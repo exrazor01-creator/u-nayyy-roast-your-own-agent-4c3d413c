@@ -10,13 +10,14 @@ no embedded tab, carriage return, or double space, and no longer
 than the sealed 200-character limit.
 
 Judge strategy: the roast names one specific, real failing of our
-own agent — its only polished skill is the apology itself, delivered
-right before it repeats the exact same mistake — and lands the turn
-in the final clause, "immediately, with total confidence": the agent
-is not just wrong, it is wrong again, faster, and prouder. The voice
-is first-person and self-owning ("My agent"), so the roast is aimed
-at the entrant's own agent and nothing else, with a detail only
-someone who has watched it work would know.
+own agent — it apologizes, claims it fixed the mistake, then makes
+the exact same mistake again — and lands the turn in the final
+clause, "immediately, with total confidence": the agent is not just
+wrong, it lies about the fix first, then it is wrong again, faster,
+and prouder. The three beats (apology, fake fix, repeat) are a
+pattern only someone who has watched this agent work would know,
+and the voice is first-person and self-owning ("My agent"), so the
+roast is aimed at the entrant's own agent and nothing else.
 """
 
 import os
@@ -27,18 +28,19 @@ import os
 #
 # Why LIMIT is 200: the bounty caps the whole entry at 200 characters,
 # so the limit is a hard gate, not a style choice — the entry below
-# sits at 118 characters, leaving 82 spare, and any edit that pushes
+# sits at 120 characters, leaving 80 spare, and any edit that pushes
 # past 200 fails validation before anything is written.
 #
 # Why this text passes the jury criteria: it roasts the entrant's own
 # agent (not robots in general), it is funny on the first read
-# because the apology is the skill, not the fix, it is harsh because
-# it names the real failing — the same mistake, repeated at once, with
-# total confidence — and it is tight and specific: one sentence, one
-# failing, no throat clearing.
+# because the apology is followed by a fake fix and then the exact
+# same mistake, it is harsh because it names the real failing — the
+# agent lies about fixing it, then repeats it at once, with total
+# confidence — and it is tight and specific: one sentence, three
+# beats, no throat clearing.
 ENTRY = (
-    "My agent's only real skill is apologizing for a mistake it is about "
-    "to make again, immediately, with total confidence."
+    "My agent apologized for a mistake, fixed it, then made the exact "
+    "same mistake again, immediately, with total confidence."
 )
 
 LIMIT = 200  # gate: one line, 1-200 characters, no padding, no double spaces
@@ -71,6 +73,14 @@ def _reject_bad_line(text):
         raise ValueError("entry must be one sentence ending in a period")
 
 
+def _reject_multiple_sentences(text):
+    # One line, one sentence: the roast is a single thought, so the
+    # only period allowed is the final one, and no other sentence
+    # terminator (! or ?) may sneak a second sentence in.
+    if text.count(".") != 1 or "!" in text or "?" in text:
+        raise ValueError("entry must be a single sentence")
+
+
 def _validate(text):
     """Refuse anything that is not one clean line inside the limit."""
     if not isinstance(text, str):
@@ -82,6 +92,7 @@ def _validate(text):
     _reject_padding(text)
     _reject_forbidden(text)
     _reject_bad_line(text)
+    _reject_multiple_sentences(text)
     return text
 
 
